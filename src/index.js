@@ -4,6 +4,9 @@ import handlebars from 'express-handlebars';
 import http from 'http';
 import { Server } from 'socket.io';
 import fs from 'fs';
+import mongoose from "mongoose";
+import dotenv from "dotenv";
+dotenv.config()
 
 const app = express();
 const port = 8080;
