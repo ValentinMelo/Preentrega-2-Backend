@@ -2,15 +2,27 @@ import express from 'express';
 import mongoose from 'mongoose';
 import ProductManager from './ProductManager.js';
 import CartManager from './CartManager.js';
+import dotenv from "dotenv";
+dotenv.config()
+
+const dbUser = process.env.DB_USER;
+const dbPassword = process.env.DB_PASSWORD;
 
 // Se conecta a la base de datos de MongoDB
-mongoose.connect('mongodb://localhost:27017/myapp', { useNewUrlParser: true, useUnifiedTopology: true });
+const environment = () => {
+  mongoose.connect(
+    `mongodb+srv://${dbUser}:${dbPassword}@codercluster.hjyrt6q.mongodb.net/?retryWrites=true&w=majority`,
+    { useNewUrlParser: true, useUnifiedTopology: true }
+  )
+  .then(() => {
+    console.log('Conexión exitosa a MongoDB!');
+  })
+  .catch(error => {
+    console.error(`Error al conectarse a la base de datos: ${error}`);
+  });
+}
 
-const db = mongoose.connection;
-db.on('error', console.error.bind(console, 'Error de conexión a MongoDB:'));
-db.once('open', function() {
-  console.log('Conexión exitosa a MongoDB!');
-});
+environment();
 
 // Crea instancias de los gestores de productos y carritos
 const cartManager = new CartManager();
@@ -111,20 +123,20 @@ router.post("/carts", (req, res) => {
   res.status(201).json(newCart);
 });
 
-const Cart = require("../models/cart");
-const Product = require("../models/product");
+import { Cart } from './models/cart.js';
 
 router.get("/carts/:cid", async (req, res) => {
   const cartId = parseInt(req.params.cid);
   try {
     const cart = await Cart.findById(cartId).populate("products");
     if (!cart) return res.status(404).send({ error: "Carrito no encontrado" });
-    res.status(200).send(cart.products);
+    res.render("cart", { products: cart.products });
   } catch (error) {
     console.error(error);
     res.status(500).send({ error: "Error al buscar el carrito" });
   }
 });
+
 
 router.post("/carts/products/:cid/product/:pid", (req, res) => {
   const cartId = parseInt(req.params.cid);

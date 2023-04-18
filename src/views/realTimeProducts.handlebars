@@ -8,9 +8,20 @@
     <h1>Listado de productos</h1>
     <ul id="product-list">
       {{#each products}}
-        <li>{{this.title}} - {{this.description}}</li>
+        <li>
+          {{this.title}} - {{this.description}} - ${{this.price}}
+          <button onclick="addToCart('{{this._id}}')">Agregar al carrito</button>
+        </li>
       {{/each}}
     </ul>
+    <div class="pagination">
+      {{#if hasPrevPage}}
+        <a href="?page={{prevPage}}" class="prev">&laquo; Anterior</a>
+      {{/if}}
+      {{#if hasNextPage}}
+        <a href="?page={{nextPage}}" class="next">Siguiente &raquo;</a>
+      {{/if}}
+    </div>
     <script src="/socket.io/socket.io.js"></script>
     <script>
       const socket = io();
@@ -21,10 +32,25 @@
         productList.innerHTML = '';
         products.forEach((product) => {
           const li = document.createElement('li');
-          li.innerText = `${product.title} - ${product.description}`;
+          li.innerText = `${product.title} - ${product.description} - $${product.price}`;
+          const button = document.createElement('button');
+          button.innerText = 'Agregar al carrito';
+          button.onclick = () => addToCart(product._id);
+          li.appendChild(button);
           productList.appendChild(li);
         });
       });
+
+      function addToCart(productId) {
+        fetch(`/cart/add/${productId}`, { method: 'POST' })
+          .then((response) => response.json())
+          .then((data) => {
+            alert(`Producto agregado al carrito. Total: $${data.total}`);
+          })
+          .catch((error) => {
+            console.error(error);
+          });
+      }
     </script>
   </body>
 </html>
