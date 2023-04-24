@@ -9,7 +9,7 @@ import connectToDatabase from './database.js';
 const app = express();
 const port = 8080;
 
-app.use(express.json()); // Use express.json() instead of body-parser
+app.use(express.json());
 
 app.engine('handlebars', handlebars.engine());
 app.set('view engine', 'handlebars');
