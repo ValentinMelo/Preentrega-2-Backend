@@ -1,16 +1,15 @@
 import express from 'express';
-import router from './routes.js';
+import router from './routes/routes.js';
 import handlebars from 'express-handlebars';
 import http from 'http';
 import { Server } from 'socket.io';
 import mongoose from "mongoose";
-import dotenv from "dotenv";
-dotenv.config()
+import connectToDatabase from './database.js';
 
 const app = express();
 const port = 8080;
 
-app.use(express.json());
+app.use(express.json()); // Use express.json() instead of body-parser
 
 app.engine('handlebars', handlebars.engine());
 app.set('view engine', 'handlebars');
@@ -33,6 +32,7 @@ io.on('connection', async (socket) => {
       status: true,
       stock: Number,
       category: String,
+      thumbnail: String
     });
 
     const products = await Product.find();
@@ -50,20 +50,5 @@ server.listen(port, () => {
   console.log(`Servidor arriba en el puerto ${port}`);
 });
 
-const dbUser = process.env.DB_USER;
-const dbPassword = process.env.DB_PASSWORD;
+connectToDatabase();
 
-const environment = () => {
-  mongoose.connect(
-    `mongodb+srv://${dbUser}:${dbPassword}@codercluster.hjyrt6q.mongodb.net/?retryWrites=true&w=majority`
-  )
-  .then(() => {
-    console.log('Conectado a la base de datos');
-  })
-  .catch(error => {
-    console.error(`Error al conectarse a la base de datos: ${error}`);
-  });
-}
-
-
-environment()
